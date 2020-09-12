@@ -1,4 +1,5 @@
 import React from 'react';
+import IndivResult from './IndivResult'
 
 export default class Results extends React.Component {
     constructor(props){
@@ -8,7 +9,9 @@ export default class Results extends React.Component {
 
         this.state = {
             query:"", //input passed down by props
-            searchResult:[] //result from API
+            searchResult:[], //result from API
+            html:[],
+            result:[]
         }
     }
 
@@ -18,33 +21,49 @@ export default class Results extends React.Component {
         return { query : props.query}
     }
 
-//dont touch this
-    shouldComponentUpdate() {
-        //updating
-        //never touch or declare this
-        console.log("----inside shouldComponentUpdate")
-        return true
-    }
 
-//when state is changed, only when query is different
+//when state is changed, FETCH results from aPI
+//side effects ie: HTTP requests are allowed here
     componentDidMount() {
         //mounting
+        if(this.props.query) {
+
+        fetch("http://api.tvmaze.com/search/shows?q="+ this.state.query)
+        .then(res => res.json())
+        .then(res => {
+            if(res.length < 1){
+                this.setState({html: 'No matching search results. try another term?'})
+            } else {
+                console.log(res)
+                let formattedResult = this.format(res);
+                this.setState({result: res, html:formattedResult})
+            }
+        })
+        .catch(error => {
+        console.log("error happened", error.message)
+    });
+    }
         console.log("----inside componentDidMount")
-
     }
 
-     componentDidUpdate() {
-        //Updating
-        console.log("----inside componentDidUpdate")
-
-    }
 
 //for when we press back to search
     componentWillUnmount() {
         console.log("----inside componentWillUnmount")
 
     }
+//helper functions
 
+//take the res.json and convert into nice HTML
+format(array) {
+    return array.map((item,index)=>{
+        let name = item.show.name;
+        let url = item.show.url;
+        let rating = item.show.rating.average;
+        let img = item.show.image ? item.show.image.medium : "image does not exist";
+        return <IndivResult name={name} img={img} rating={rating} url ={url} key={index} />
+    })
+}
 
 
 
@@ -57,6 +76,9 @@ export default class Results extends React.Component {
             <>
                 <h1>You have entered search term {this.state.query}</h1>
                 <br/>
+                <div className="resultList" >
+                {this.state.html}
+                </div>
 
             </>
             )

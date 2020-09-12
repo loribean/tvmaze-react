@@ -11,8 +11,6 @@ class Search extends React.Component {
             valueInput: "",
             query:"",
             resultDisplay: false // is the view displaying results
-
-
         }
     }
 
@@ -36,15 +34,29 @@ class Search extends React.Component {
                     alert("Please enter more than 1 character and less than 200")
                 }}
 
+    //handle click for back to search page
+    backToSearchClickHandler = () => {
+        this.setState({valueInput: "",
+            query:"",resultDisplay: false})
+    }
+
     render(){
+        if(!this.state.resultDisplay){
         return (
             <div>
                 <SearchBar onChange={this.inputChangeHandler} onClick ={this.onClickHandler} value={this.state.valueInput} />
+            </div>)
+
+        }
+
+        return (
+            <div>
+                <button onClick ={this.backToSearchClickHandler} > Search Again </button>
                 <Results query={this.state.query}/>
+            </div>)
 
-            </div>
 
-            )
+
     }
 }
 
