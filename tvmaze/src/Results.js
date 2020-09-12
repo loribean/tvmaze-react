@@ -1,6 +1,6 @@
 import React from 'react';
 import IndivResult from './IndivResult';
-import Sort from './Sort';
+
 
 export default class Results extends React.Component {
     constructor(props){
@@ -49,19 +49,14 @@ export default class Results extends React.Component {
 
 
 //force the page to re-render
-    componentDidUpdate (prevProps,prevState) {
-        if(prevState.sort !== this.state.sort){
+    componentDidUpdate (prevProps) {
+        if(prevProps.sort !== this.props.sort){
             this.sortMe(this.state.result, this.state.sort)
             let sortedhtml = this.format(this.state.result);
             this.setState({html: sortedhtml})
         }
     }
- //on change handler for select SORT
 
-onChangeSort = (event) =>{
-    let filter = event.target.value;
-    this.setState({sort:filter})
-}
 
 
 //helper functions
@@ -114,7 +109,7 @@ sortMe(array,category){
             <>
                 <h1>You have entered search term {this.state.query}</h1>
                 <br/>
-                <Sort onChange={this.onChangeSort} optionChoice={this.state.sort}/>
+
                 <div className="resultList" >
                 {this.state.html}
                 </div>

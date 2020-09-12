@@ -1,6 +1,7 @@
 import React from 'react';
 import SearchBar from './SearchBar';
 import Results from './Results';
+import Sort from './Sort';
 
 
 
@@ -11,7 +12,8 @@ class Search extends React.Component {
         this.state ={
             valueInput: "",
             query:"",
-            resultDisplay: false // is the view displaying results
+            resultDisplay: false, // is the view displaying results
+            sort:"default"
         }
     }
 
@@ -38,8 +40,15 @@ class Search extends React.Component {
     //handle click for back to search page
     backToSearchClickHandler = () => {
         this.setState({valueInput: "",
-            query:"",resultDisplay: false})
+            query:"",resultDisplay: false,sort:"default"})
     }
+
+     //on change handler for select SORT
+
+onChangeSort = (event) =>{
+    let filter = event.target.value;
+    this.setState({sort:filter})
+}
 
     render(){
         if(!this.state.resultDisplay){
@@ -53,7 +62,8 @@ class Search extends React.Component {
         return (
             <div>
                 <button onClick ={this.backToSearchClickHandler} > Search Again </button>
-                <Results query={this.state.query}/>
+                <Sort onChange={this.onChangeSort} optionChoice={this.state.sort}/>
+                <Results query={this.state.query} sort={this.state.sort}/>
             </div>)
 
 
