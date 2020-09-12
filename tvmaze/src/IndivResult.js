@@ -10,6 +10,7 @@ const IndivResult = (props) => {
         <img src={props.img} alt="img"/>
         <h4>{props.name}</h4>
         <p>rating: {props.rating}</p>
+
         <a href={props.url}>SHOW URL </a>
         </div>
         )

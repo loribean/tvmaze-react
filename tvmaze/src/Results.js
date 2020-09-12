@@ -1,5 +1,6 @@
 import React from 'react';
-import IndivResult from './IndivResult'
+import IndivResult from './IndivResult';
+import Sort from './Sort';
 
 export default class Results extends React.Component {
     constructor(props){
@@ -11,14 +12,15 @@ export default class Results extends React.Component {
             query:"", //input passed down by props
             searchResult:[], //result from API
             html:[],
-            result:[]
+            result:[],
+            sort:"default" //original api is sorted by this
         }
     }
 
 //set state with props from parent: SEARCH
-    static getDerivedStateFromProps(props,state) {
+    static getDerivedStateFromProps(nextProps,prevState) {
         //mounting
-        return { query : props.query}
+        return { query : nextProps.query, sort: nextProps.sort}
     }
 
 
@@ -27,14 +29,13 @@ export default class Results extends React.Component {
     componentDidMount() {
         //mounting
         if(this.props.query) {
-
         fetch("http://api.tvmaze.com/search/shows?q="+ this.state.query)
         .then(res => res.json())
         .then(res => {
             if(res.length < 1){
                 this.setState({html: 'No matching search results. try another term?'})
             } else {
-                console.log(res)
+
                 let formattedResult = this.format(res);
                 this.setState({result: res, html:formattedResult})
             }
@@ -47,11 +48,22 @@ export default class Results extends React.Component {
     }
 
 
-//for when we press back to search
-    componentWillUnmount() {
-        console.log("----inside componentWillUnmount")
-
+//force the page to re-render
+    componentDidUpdate (prevProps,prevState) {
+        if(prevState.sort !== this.state.sort){
+            this.sortMe(this.state.result, this.state.sort)
+            let sortedhtml = this.format(this.state.result);
+            this.setState({html: sortedhtml})
+        }
     }
+ //on change handler for select SORT
+
+onChangeSort = (event) =>{
+    let filter = event.target.value;
+    this.setState({sort:filter})
+}
+
+
 //helper functions
 
 //take the res.json and convert into nice HTML
@@ -61,8 +73,34 @@ format(array) {
         let url = item.show.url;
         let rating = item.show.rating.average;
         let img = item.show.image ? item.show.image.medium : "image does not exist";
-        return <IndivResult name={name} img={img} rating={rating} url ={url} key={index} />
+        // let network = item.show.network.name ? item.show.network.name : "No network available" ;
+        return <IndivResult name={name} img={img} rating={rating} url ={url}  key={index} />
     })
+}
+
+// sorts results based on selected category
+
+sortMe(array,category){
+    switch(category){
+        case "name":
+        array.sort((a,b)=>{
+            return(b.show.name > a.show.name) ? 1: -1
+        })
+        break;
+    case "rating":
+        array.sort((a,b)=>{
+            return(b.show.rating > a.show.rating) ? 1: -1
+        })
+        break;
+    case "network":
+        array.sort((a,b)=>{
+            return(b.show.network.id > a.show.network.id) ? 1: -1
+        })
+        break
+    default:
+            return array;
+
+    }
 }
 
 
@@ -70,12 +108,13 @@ format(array) {
 
 
     render(){
-        console.log("----insider render")
+
 
         return (
             <>
                 <h1>You have entered search term {this.state.query}</h1>
                 <br/>
+                <Sort onChange={this.onChangeSort} optionChoice={this.state.sort}/>
                 <div className="resultList" >
                 {this.state.html}
                 </div>
